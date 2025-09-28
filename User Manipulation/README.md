@@ -19,9 +19,9 @@ A fully functional web application for managing users and posts, featuring a bea
 
 ## Tech Stack
 
-- **Backend:** Flask / Django / Node.js
+- **Backend:** Flask, Python
 - **Frontend:** HTML, CSS
-- **Database:** 
+- **Database:** sqlalchemy
 - **Authentication:** Flask-Login
 
 ## Installation
