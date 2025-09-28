@@ -2,7 +2,7 @@ from flask import Flask
 from config import Config
 from blueprints.home.routes import home_bp
 from blueprints.user.routes import user_bp
-from extensions import db, login_manager, migrate
+from extensions import db, login_manager
 from logger import Logger
 from models import User
 
@@ -18,9 +18,8 @@ def create_app():
     with app.app_context():
         db.create_all()
         
+    # Login Manager
     login_manager.init_app(app)
-    migrate.init_app(app, db)
-
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))

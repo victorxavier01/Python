@@ -15,5 +15,6 @@ class Logger:
         console_handler.setLevel(level)
         console_handler.setFormatter(file_formatter)
 
+
         self.logger.addHandler(file_handler)
         self.logger.addHandler(console_handler)
