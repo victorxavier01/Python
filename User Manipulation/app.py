@@ -13,7 +13,7 @@ def create_app():
     # Logs
     logging.basicConfig(
         filename="app.log",
-        level=logging.critical,
+        level=logging.CRITICAL,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
     )
 
