@@ -30,15 +30,21 @@ A fully functional web application for managing users and posts, featuring a bea
    ```bash
    git clone https://github.com/victorxavier01/Python.git
 
-2. Install dependencies:
+2. Make a secret key:
+Create a .env file and write your secret key.  
+Example:
+   ```bash
+   SECRET_KEY = "YOUR-SECRET-KEY"
+   ```
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
 
-3. Run the application:
+4. Run the application:
    ```bash
    flask run
 
-4. Open your browser and enter:
+5. Open your browser and enter:
     ```bash
     http://localhost:5000
 

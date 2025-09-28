@@ -1,3 +1,4 @@
+import logging
 from flask import Flask
 from config import Config
 from blueprints.home.routes import home_bp
@@ -8,6 +9,15 @@ from models import User
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    # Logs
+    logging.basicConfig(
+        filename="app.log",
+        level=logging.critical,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    )
+
+    app.logger.info("App iniciado!")
 
     db.init_app(app)
     login_manager.init_app(app)
