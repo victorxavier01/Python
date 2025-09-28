@@ -1,23 +1,17 @@
-import logging
 from flask import Flask
 from config import Config
 from blueprints.home.routes import home_bp
 from blueprints.user.routes import user_bp
 from extensions import db, login_manager, migrate
+from logger import Logger
 from models import User
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Logs
-    logging.basicConfig(
-        filename="app.log",
-        level=logging.CRITICAL,
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-    )
-
-    app.logger.info("App iniciado!")
+    # Logger
+    Logger(app.logger)
 
     db.init_app(app)
     login_manager.init_app(app)
@@ -30,6 +24,8 @@ def create_app():
     # Blueprints
     app.register_blueprint(home_bp)
     app.register_blueprint(user_bp, url_prefix="/user")
+
+    app.logger.info("App iniciado!")
 
     return app
 
