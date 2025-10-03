@@ -1,13 +1,14 @@
 from extensions import db, login_manager
 from flask_login import UserMixin
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, ForeignKey
+from sqlalchemy import Integer, String, ForeignKey, Boolean
 
 class User(UserMixin, db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(200), nullable=False)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
 
     posts = relationship("Post", back_populates="author")
 
