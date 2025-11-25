@@ -1,14 +1,16 @@
 from flask import Blueprint, render_template, current_app, redirect, url_for, flash
 from flask_login import current_user, login_user
 from .forms import RegisterForm, LoginForm
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from extensions import db
 from models import User
+from utils import save_profile_pic
 
 user_bp = Blueprint("user", __name__)
 
 @user_bp.route('/login', methods=["GET", "POST"])
 def login():
+    current_app.logger.info("Usuário acessou a página de login")
     if current_user.is_authenticated:
         return redirect(url_for("home.home"))
     form = LoginForm()
@@ -30,10 +32,44 @@ def login():
             #return redirect(url_for(get_all_posts))
             return redirect(url_for("home.home"))
         
-    current_app.logger.info("Usuário acessou a página de login")
     return render_template("login.html", form=form)
 
 @user_bp.route('/register', methods=["GET", "POST"])
 def register():
     current_app.logger.info("Usuário acessou a página de registro")
-    return render_template("register.html")
+    form = RegisterForm()
+
+    if form.validate_on_submit():
+
+        user_check = db.session.execute(db.select(User).where(User.email == form.email.data)).scalar()
+
+        if user_check:
+            flash("Email already exists. Try logging in instead!")
+            return redirect(url_for("user.login"))
+
+        username_check = db.session.execute(
+            db.select(User).where(User.username == form.username.data)).scalar()
+
+        if username_check:
+            flash("Username already taken.")
+            return redirect(url_for("user.register"))
+
+        picture_file = None
+        if form.profile_pic.data:
+            picture_file = save_profile_pic(form.profile_pic.data)
+
+        new_user = User(
+            username = form.username.data,
+            email = form.email.data,
+            password = generate_password_hash(form.password.data, method="pbkdf2:sha256", salt_length=8),
+            profile_pic = picture_file or "default.png"
+        )
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash("Account created successfully!")
+        login_user(new_user)
+        return redirect(url_for("home.home"))
+    
+    return render_template("register.html", form=form)

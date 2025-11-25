@@ -11,7 +11,7 @@ class User(UserMixin, db.Model):
     email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(200), nullable=False)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
-    profile_pic: Mapped[str] = mapped_column(String(250), nullable=True)
+    profile_pic: Mapped[str] = mapped_column(String(250), nullable=True, default="default.png")
 
     posts = relationship("Post", back_populates="author", cascade="all, delete-orphan")
 
