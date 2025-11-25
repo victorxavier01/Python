@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, current_app, redirect, url_for, flash
-from flask_login import current_user, login_user
+from flask_login import current_user, login_user, logout_user, login_required
 from .forms import RegisterForm, LoginForm
 from werkzeug.security import check_password_hash, generate_password_hash
 from extensions import db
 from models import User
-from utils import save_profile_pic
+from .utils import save_profile_pic
 
 user_bp = Blueprint("user", __name__)
 
@@ -73,3 +73,9 @@ def register():
         return redirect(url_for("home.home"))
     
     return render_template("register.html", form=form)
+
+@user_bp.route("/logout")
+def logout():
+    logout_user()
+    current_app.logger.info("User has logged out!")
+    return redirect(url_for("home.home"))

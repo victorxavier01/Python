@@ -2,6 +2,20 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-
+    <form method="POST" action="{{ url_for('user.register') }}" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        {{ form.username.label(class_="form-label") }}
+        {{ form.username(class_="form-input") }}
+        {{ form.email.label(class_="form-label") }}
+        {{ form.email(class_="form-input") }}
+        {{ form.password.label(class_="form-label") }}
+        {{ form.password(class_="form-input") }}
+        {{ form.confirm_password.label(class_="form-label") }}
+        {{ form.confirm_password(class_="form-input") }}
+        <br>
+        {{ form.profile_pic.label(class_="form-label") }}
+        {{ form.profile_pic(class_="form-input-file") }}
+        {{ form.submit(class_="btn btn-primary") }}
+    </form>
 
 {% endblock %}
