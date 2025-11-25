@@ -3,10 +3,22 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-
-<nav>
-    <a href="{{ url_for('home.home') }}">Home</a>
-</nav>
-<h2>Login page</h2>
+<div class="container">
+    <nav>
+        <a href="{{ url_for('home.home') }}">Home</a>
+    </nav>
+    <h2>Login page</h2>
+    <div class="form">
+        <form method="POST" action="{{ url_for('user.login') }}">
+            {{ form.hidden_tag() }}
+            {{ form.email.label(class_="form-label") }}
+            {{ form.email(size=20, class_="form-input") }}
+            {{ form.password.label(class_="form-label") }}
+            {{ form.password(size=20, class_="form-input") }}
+            {{ form.submit(class_="btn btn-primary") }}
+        </form>
+        <a href="{{ url_for('user.register') }}">Register</a>
+    </div>
+</div>
 
 {% endblock %}
