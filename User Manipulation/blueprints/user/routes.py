@@ -1,10 +1,11 @@
 from flask import Blueprint, render_template, current_app, redirect, url_for, flash
 from flask_login import current_user, login_user, logout_user, login_required
-from .forms import RegisterForm, LoginForm
+from .forms import RegisterForm, LoginForm, PostForm
 from werkzeug.security import check_password_hash, generate_password_hash
 from extensions import db
-from models import User
+from models import User, Post
 from .utils import save_profile_pic
+from datetime import date
 
 user_bp = Blueprint("user", __name__)
 
@@ -83,3 +84,26 @@ def logout():
     logout_user()
     current_app.logger.info("User has logged out.")
     return redirect(url_for("home.home"))
+
+@user_bp.route("/create-post", methods=["GET", "POST"])
+@login_required
+def create_post():
+    current_app.logger.info("User has entered create poster page")
+    form = PostForm()
+
+    if form.validate_on_submit():
+        new_post = Post(
+            title = form.title.data,
+            date = date.today().strftime("%B %d, %Y"),
+            body = form.body.data,
+            author = current_user.id,
+            author_name = current_user.username
+        )
+        db.session.add(new_post)
+        db.session.commit()
+        current_app.logger.info("Post created successfully!")
+        #return redirect(url_for(get_all_posts))
+        return redirect(url_for("home.home"))
+
+
+    return render_template("create-post.html", form=form)

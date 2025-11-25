@@ -6,7 +6,7 @@ class Logger:
         self.logger = app_logger
         self.logger.setLevel(level)
 
-        file_handler = RotatingFileHandler(log_file, maxBytes=100000, backupCount=3)
+        file_handler = RotatingFileHandler(log_file, maxBytes=100000, backupCount=3, encoding="utf-8")
         file_handler.setLevel(level)
         file_formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
         file_handler.setFormatter(file_formatter)
