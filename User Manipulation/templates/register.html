@@ -2,6 +2,25 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-
+<div class="form">
+    <form method="POST" action="{{ url_for('user.register') }}" enctype="multipart/form-data">
+        {% for field, errors in form.errors.items() %}
+            <p style="color:red">{{ field }}: {{ errors }}</p>
+        {% endfor %}
+        {{ form.hidden_tag() }}
+        {{ form.username.label(class_="form-label") }}
+        {{ form.username(class_="form-input") }}
+        {{ form.email.label(class_="form-label") }}
+        {{ form.email(class_="form-input") }}
+        {{ form.password.label(class_="form-label") }}
+        {{ form.password(class_="form-input") }}
+        {{ form.confirm_password.label(class_="form-label") }}
+        {{ form.confirm_password(class_="form-input") }}
+        <br>
+        {{ form.profile_pic.label(class_="form-label") }}
+        {{ form.profile_pic(class_="form-input-file") }}
+        {{ form.submit(class_="btn btn-primary") }}
+    </form>
+</div>
 
 {% endblock %}
