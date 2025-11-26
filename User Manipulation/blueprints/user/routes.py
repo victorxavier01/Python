@@ -78,8 +78,8 @@ def register():
 @user_bp.route("/logout")
 @login_required
 def logout():
-    logout_user()
     current_app.logger.info(f"User {current_user.username} (ID:{current_user.id}) has logged out.")
+    logout_user()
     return redirect(url_for("home.home"))
 
 @user_bp.route("/create-post", methods=["GET", "POST"])
