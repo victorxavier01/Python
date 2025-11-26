@@ -7,7 +7,7 @@ from models import User, Post
 from .utils import save_profile_pic
 from datetime import date
 
-user_bp = Blueprint("user", __name__)
+user_bp = Blueprint("user", __name__, url_prefix="/user")
 
 @user_bp.route('/login', methods=["GET", "POST"])
 def login():
