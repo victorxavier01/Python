@@ -2,6 +2,7 @@ from flask import Flask
 from config import Config
 from blueprints.home.routes import home_bp
 from blueprints.user.routes import user_bp
+from blueprints.posts.routes import post_bp
 from extensions import db, login_manager
 from logger import Logger
 from models import User
@@ -27,6 +28,7 @@ def create_app():
     # Blueprints
     app.register_blueprint(home_bp)
     app.register_blueprint(user_bp, url_prefix="/user")
+    app.register_blueprint(post_bp)
 
     app.logger.info("App iniciado!")
 

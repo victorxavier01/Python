@@ -45,7 +45,6 @@ def register():
         user_check = db.session.execute(db.select(User).where(User.email == form.email.data)).scalar()
 
         if user_check:
-            print("aaaa")
             flash("Email already exists. Try logging in instead!")
             return redirect(url_for("user.login"))
 
@@ -53,13 +52,11 @@ def register():
             db.select(User).where(User.username == form.username.data)).scalar()
 
         if username_check:
-            print("bbbb")
             flash("Username already taken.")
             return redirect(url_for("user.register"))
 
         picture_file = None
         if form.profile_pic.data:
-            print("cccc")
             picture_file = save_profile_pic(form.profile_pic.data)
 
         new_user = User(
@@ -72,7 +69,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        current_app.logger.info("Account created successfully!\nReturning to Home page.")
+        current_app.logger.info(f"Account {new_user.username} (ID:{new_user.id}) created successfully! Returning to Home page.")
         login_user(new_user)
         return redirect(url_for("home.home"))
     
@@ -82,13 +79,13 @@ def register():
 @login_required
 def logout():
     logout_user()
-    current_app.logger.info("User has logged out.")
+    current_app.logger.info(f"User {current_user.username} (ID:{current_user.id}) has logged out.")
     return redirect(url_for("home.home"))
 
 @user_bp.route("/create-post", methods=["GET", "POST"])
 @login_required
 def create_post():
-    current_app.logger.info("User has entered create poster page")
+    current_app.logger.info(f"User {current_user.username} (ID:{current_user.id}) accessed the posts list page.")
     form = PostForm()
 
     if form.validate_on_submit():
@@ -104,6 +101,5 @@ def create_post():
         current_app.logger.info("Post created successfully!")
         #return redirect(url_for(get_all_posts))
         return redirect(url_for("home.home"))
-
 
     return render_template("create-post.html", form=form)
