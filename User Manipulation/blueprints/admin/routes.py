@@ -3,7 +3,8 @@ from flask import Blueprint, render_template, current_app, redirect, url_for, fl
 from flask_login import current_user, login_required
 from extensions import db
 from models import User, Post
-from .forms import EditForm
+from .forms import EditForm, DeleteForm
+from .utils import delete_profile_pic
 from werkzeug.security import generate_password_hash
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -31,7 +32,7 @@ def admin_edit_user():
     users = db.session.execute(db.select(User)).scalars().all()
     form = EditForm()
 
-    user_id = request.args.get("user_id", type=int)
+    user_id = request.args.get("user_id", type = int)
     selected_user = None
 
     if user_id:
@@ -47,7 +48,6 @@ def admin_edit_user():
 
     if request.method == "POST" and form.validate_on_submit() and selected_user:
         current_app.logger.warning(f"Admin {current_user.username} (ID:{current_user.id}) is trying to edit {selected_user.username} (ID:{selected_user.id})")
-
 
         selected_user.username = form.username.data
         selected_user.email = form.email.data
@@ -69,6 +69,39 @@ def admin_edit_user():
 @login_required
 @admin_required
 def delete_user():
+    current_app.logger.info(f"Admin {current_user.username} (ID:{current_user.id}) accessed the admin delete user page")
 
+    users = db.session.execute(db.select(User)).scalars().all()
 
-    return render_template("delete_user.html", selected_user = selected_user)
+    user_id = request.args.get("user_id", type = int)
+    selected_user = None
+
+    if user_id:
+        selected_user = db.session.get(User, user_id)
+        if not selected_user:
+            flash("User not found", "danger")
+            return redirect(url_for("admin.delete_user"))
+        if selected_user.is_admin:
+            current_app.logger.error(f"Admin {current_user.username} (ID:{current_user.id}) is trying to delete another admin ({selected_user.username} | ID:({selected_user.id}))")
+            flash("You can not delete another admin", "danger")
+            return redirect(url_for("admin.delete_user"))
+        if selected_user.id == current_user.id:
+            current_app.logger.error(f"Admin {current_user.username} (ID:{current_user.id}) is trying to delete himself")
+            flash("You cannot delete yourself", "danger")
+            return redirect(url_for("admin.delete_user"))
+    
+    form = DeleteForm()
+
+    if request.method == "POST" and selected_user:
+        current_app.logger.warning(f"Admin {current_user.username} (ID:{current_user.id}) is trying to delete {selected_user.username} (ID:{selected_user.id})")
+
+        db.session.delete(selected_user)
+        if selected_user.profile_pic:
+            delete_profile_pic(selected_user.profile_pic)
+        db.session.commit()
+        current_app.logger.warning(f"Admin {current_user.username} (ID:{current_user.id}) deleted {selected_user.username} (ID:{selected_user.id})")
+
+        flash("User deleted successfully!", "success")
+        return redirect(url_for('admin.delete_user'))
+
+    return render_template("delete_user.html", users = users, selected_user = selected_user, form = form)

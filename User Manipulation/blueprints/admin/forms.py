@@ -10,3 +10,6 @@ class EditForm(FlaskForm):
     password = PasswordField("Password")
     profile_pic = FileField("Profile Picture", validators=[FileAllowed(["jpg", "png", "jpeg"])])
     submit = SubmitField("Edit")
+
+class DeleteForm(FlaskForm):
+    submit = SubmitField("Delete User")
