@@ -32,8 +32,7 @@ def login():
         
         else:
             login_user(user)
-            #return redirect(url_for(get_all_posts))
-            return redirect(url_for("home.home"))
+            return redirect(url_for("user.see_all_posts"))
         
     return render_template("login.html", form=form)
 
@@ -128,6 +127,14 @@ def see_post(post_id):
     
     return render_template("see_post.html", post = post_to_see)
 
+@user_bp.route("/see_all_posts")
+@login_required
+def see_all_posts():
+
+    posts = Post.query.order_by(Post.date.desc()).all()
+
+    return render_template("see_all_posts.html", posts = posts)
+
 @user_bp.route("/edit_post/<int:post_id>", methods=["GET", "POST"])
 @login_required
 def edit_post(post_id):
@@ -153,3 +160,21 @@ def edit_post(post_id):
         form.content.data = post_to_edit.content
 
     return render_template("edit_post", form = form, post = post_to_edit)
+
+@user_bp.route("/delete_post/<int:post_id>", methods=["POST"])
+@login_required
+def delete_post(post_id):
+    post_to_delete = Post.query.get_or_404(post_id)
+
+    if post_to_delete.user_id != current_user.id and not current_user.is_admin:
+        flash("You do not have permission to delete this post.", "danger")
+        current_app.logger.warning(f"User {current_user.username} (ID:{current_user.id}) tried to delete post {post_id} without permission")
+        return redirect(url_for("user.see_all_posts"))
+
+    db.session.delete(post_to_delete)
+    db.session.commit()
+
+    current_app.logger.warning(f"{current_user.username} (ID:{current_user.id}) has deleted post {post_id}")
+    flash("Post deleted successfully!", "success")
+    return redirect(url_for("user.see_all_posts"))
+    
