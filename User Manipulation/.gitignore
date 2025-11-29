@@ -1,2 +1,42 @@
+# env
 .env
+*.env
+
+# Logs
 app.log
+*.log
+
+# BD
+instance/
+instance/*.db
+instance/*.sqlite
+instance/*.sqlite3
+
+# Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# venv
+venv/
+env/
+.venv/
+.env/
+
+# 
+static/profile_pics/
+!static/profile_pics/default.png  # mantém a foto padrão
+
+# Werkzeug
+*.pid
+
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+
+
+.DS_Store
+Thumbs.db

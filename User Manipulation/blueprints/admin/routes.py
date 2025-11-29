@@ -81,10 +81,12 @@ def delete_user():
         if not selected_user:
             flash("User not found", "danger")
             return redirect(url_for("admin.delete_user"))
+        
         if selected_user.is_admin:
             current_app.logger.error(f"Admin {current_user.username} (ID:{current_user.id}) is trying to delete another admin ({selected_user.username} | ID:({selected_user.id}))")
             flash("You can not delete another admin", "danger")
             return redirect(url_for("admin.delete_user"))
+        
         if selected_user.id == current_user.id:
             current_app.logger.error(f"Admin {current_user.username} (ID:{current_user.id}) is trying to delete himself")
             flash("You cannot delete yourself", "danger")
