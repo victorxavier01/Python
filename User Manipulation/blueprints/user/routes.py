@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, current_app, redirect, url_for, flash
+from flask import Blueprint, render_template, current_app, redirect, url_for, flash, request
 from flask_login import current_user, login_user, logout_user, login_required
 from .forms import RegisterForm, LoginForm, PostForm
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -12,8 +12,10 @@ user_bp = Blueprint("user", __name__, url_prefix="/user")
 @user_bp.route('/login', methods=["GET", "POST"])
 def login():
     current_app.logger.info("Usuário acessou a página de login")
+
     if current_user.is_authenticated:
         return redirect(url_for("home.home"))
+    
     form = LoginForm()
 
     if form.validate_on_submit():
@@ -38,6 +40,7 @@ def login():
 @user_bp.route('/register', methods=["GET", "POST"])
 def register():
     current_app.logger.info("Usuário acessou a página de registro")
+
     form = RegisterForm()
 
     if form.validate_on_submit():
@@ -70,7 +73,9 @@ def register():
         db.session.commit()
 
         current_app.logger.info(f"Account {new_user.username} (ID:{new_user.id}) created successfully! Returning to Home page.")
+
         login_user(new_user)
+
         return redirect(url_for("home.home"))
     
     return render_template("register.html", form=form)
@@ -82,24 +87,69 @@ def logout():
     logout_user()
     return redirect(url_for("home.home"))
 
-@user_bp.route("/create-post", methods=["GET", "POST"])
+@user_bp.route("/create_post", methods=["GET", "POST"])
 @login_required
 def create_post():
-    current_app.logger.info(f"User {current_user.username} (ID:{current_user.id}) accessed the posts list page.")
+    current_app.logger.info(f"User {current_user.username} (ID:{current_user.id}) accessed the create post page.")
     form = PostForm()
 
     if form.validate_on_submit():
         new_post = Post(
             title = form.title.data,
-            date = date.today().strftime("%B %d, %Y"),
+            date = date.today().strftime("%d/%b/%Y"),
             body = form.body.data,
-            author = current_user.id,
-            author_name = current_user.username
+            user_id = current_user.id,
         )
+        
         db.session.add(new_post)
         db.session.commit()
+
         current_app.logger.info("Post created successfully!")
-        #return redirect(url_for(get_all_posts))
+
+        return redirect(url_for("user.see_post", post_id=new_post.id))
+
+    return render_template("create_post.html", form=form)
+
+@user_bp.route("/my_profile", methods=["GET", "POST"])
+@login_required
+def my_profile():
+    user_posts = Post.query.filter_by(user_id=current_user.id).all()
+
+    return render_template("my_profile.html", posts = user_posts)
+
+@user_bp.route("/see_post/<int:post_id>", methods=["GET", "POST"])
+@login_required
+def see_post(post_id):
+    post_to_see = Post.query.get_or_404(post_id)
+
+    if not post_to_see:
+        flash("Post not found", "danger")
+        return redirect(url_for("home.home"))
+    
+    return render_template("see_post.html", post = post_to_see)
+
+@user_bp.route("/edit_post/<int:post_id>", methods=["GET", "POST"])
+@login_required
+def edit_post(post_id):
+    form = PostForm()
+
+    post_to_edit = Post.query.get_or_404(post_id)
+
+    if post_to_edit.user_id != current_user.id:
+        flash("You have not permission to edit this post", "danger")
         return redirect(url_for("home.home"))
 
-    return render_template("create-post.html", form=form)
+    if form.validate_on_submit():
+        post_to_edit.title = form.title.data
+        post_to_edit.content = form.content.data
+        
+        db.session.commit()
+
+        flash("Post updated successfully", "success")
+        return redirect(url_for("user.see_post", post = post_to_edit.id))
+    
+    if request.method == "GET":
+        form.title.data = post_to_edit.title
+        form.content.data = post_to_edit.content
+
+    return render_template("edit_post", form = form, post = post_to_edit)
