@@ -21,3 +21,8 @@ class PostForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()])
     body = CKEditorField("Body", validators=[DataRequired()])
     submit = SubmitField("Send Post")
+
+class EditPostForm(FlaskForm):
+    title = StringField("Title", validators=[DataRequired()])
+    body = CKEditorField("Body", validators=[DataRequired()])
+    submit = SubmitField("Edit Post")

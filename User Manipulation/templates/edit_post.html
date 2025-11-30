@@ -11,9 +11,16 @@
              alt="{{ post.author.username }} profile picture" width="40" height="40">
         {{ post.author.username }}
     </div>
-    <p>{{ post.date }}</p>
-    <h3>{{ post.title }}</h3>
-    <p>{{ post.body }}</p>
+    <form method = "POST" class="form" action = "{{ url_for('user.edit_post', post_id = post.id) }}" >
+        {{ form.hidden_tag() }}
+        {{ form.title.label(class_="form-label") }}
+        {{ form.title(class_="form-input") }}
+        {{ form.body.label(class_="form-label") }}
+        {{ form.body(class_="form-input") }}
+        {{ form.submit(class_="btn btn-primary") }}
+
+    </form>
+    <h3>{{ post.date.strftime("%d/%m/%Y %H:%M") }}</h3>
 </div>
 <hr>
 

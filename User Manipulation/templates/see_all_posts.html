@@ -12,7 +12,7 @@
              alt="{{ post.author.username }} profile picture" width="40" height="40">
         {{ post.author.username }}
     </div>
-    <p>{{ post.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
+    <p>{{ post.date.strftime("%d/%m/%Y %H:%M") }}</p>
     <h3>{{ post.title }}</h3>
     <p>{{ post.body }}</p>
     <a href="{{ url_for('user.see_post', post_id = post.id) }}">Read more</a>

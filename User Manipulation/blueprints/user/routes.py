@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, current_app, redirect, url_for, flash, request
 from flask_login import current_user, login_user, logout_user, login_required
-from .forms import RegisterForm, LoginForm, PostForm
+from .forms import RegisterForm, LoginForm, PostForm, EditPostForm
 from werkzeug.security import check_password_hash, generate_password_hash
 from extensions import db
 from models import User, Post
@@ -139,7 +139,7 @@ def see_all_posts():
 @user_bp.route("/edit_post/<int:post_id>", methods=["GET", "POST"])
 @login_required
 def edit_post(post_id):
-    form = PostForm()
+    form = EditPostForm()
 
     post_to_edit = Post.query.get_or_404(post_id)
 
@@ -151,11 +151,14 @@ def edit_post(post_id):
     if form.validate_on_submit():
         post_to_edit.title = form.title.data
         post_to_edit.body = form.body.data
+        post_to_edit.date = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        current_app.logger.info(f"User {current_user.username} (ID:{current_user.id}) edited the post {post_id}")
+
         
         db.session.commit()
 
         flash("Post updated successfully", "success")
-        return redirect(url_for("user.see_post", post = post_to_edit.id))
+        return redirect(url_for("user.see_post", post_id = post_to_edit.id))
     
     if request.method == "GET":
         form.title.data = post_to_edit.title

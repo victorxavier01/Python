@@ -6,7 +6,6 @@ from blueprints.admin.routes import admin_bp
 from extensions import db, login_manager
 from logger import Logger
 from models import User
-import tzdata
 
 def create_app():
     app = Flask(__name__)
