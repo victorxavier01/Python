@@ -11,16 +11,30 @@
              alt="{{ post.author.username }} profile picture" width="40" height="40">
         {{ post.author.username }}
     </div>
-    <form method = "POST" class="form" action = "{{ url_for('user.edit_post', post_id = post.id) }}" >
+    <form method = "POST" class="form" action = "{{ url_for('user.edit_post', post_id = post.id) }}" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
+
+        <p>{{ post.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
+
         {{ form.title.label(class_="form-label") }}
         {{ form.title(class_="form-input") }}
+
         {{ form.body.label(class_="form-label") }}
         {{ form.body(class_="form-input") }}
+
+        {% if post.post_pic %}
+        <img src="{{ url_for('static', filename='post_pics/' ~ post.post_pic) }}" 
+         alt="imagem atual do post"
+         class="post-pic-preview">
+        {% endif %}
+
+        {{ form.post_pic.label(class_="form-label") }}
+        {{ form.post_pic(class_="form-input") }}
+
         {{ form.submit(class_="btn btn-primary") }}
 
     </form>
-    <h3>{{ post.date.strftime("%d/%m/%Y %H:%M") }}</h3>
+
 </div>
 <hr>
 

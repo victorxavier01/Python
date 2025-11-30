@@ -20,9 +20,11 @@ class LoginForm(FlaskForm):
 class PostForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()])
     body = CKEditorField("Body", validators=[DataRequired()])
+    post_pic = FileField("Imagem do Post", validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
     submit = SubmitField("Send Post")
 
 class EditPostForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()])
     body = CKEditorField("Body", validators=[DataRequired()])
-    submit = SubmitField("Edit Post")
+    post_pic = FileField("Imagem do Post", validators=[FileAllowed(['jpg', 'png', 'jpeg'])])
+    submit = SubmitField("Confirm Edit")

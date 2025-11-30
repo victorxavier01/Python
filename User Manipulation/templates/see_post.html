@@ -6,9 +6,10 @@
 {% if current_user.is_authenticated %}
         <div class="post">
             <p>{{ current_user.username }}</p>
-            <p>{{ post.date.strftime("%d/%m/%Y %H:%M") }}</p>
+            <p>{{ post.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
             <h2>{{ post.title }}</h2>
             <p>{{ post.body }}</p>
+            <img src="{{ url_for('static', filename='post_pics/' ~ post.post_pic) }}" alt="imagem do post" class="post-pic">
         </div>
 {% endif %}
 {% endblock %}

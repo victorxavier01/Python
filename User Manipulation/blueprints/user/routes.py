@@ -4,7 +4,7 @@ from .forms import RegisterForm, LoginForm, PostForm, EditPostForm
 from werkzeug.security import check_password_hash, generate_password_hash
 from extensions import db
 from models import User, Post
-from .utils import save_profile_pic
+from .utils import save_profile_pic, save_post_pic
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -94,11 +94,17 @@ def create_post():
     form = PostForm()
 
     if form.validate_on_submit():
+        if form.post_pic.data:
+            picture_file = save_post_pic(form.post_pic.data)
+        else:
+            picture_file = "default.png"
+
         new_post = Post(
             title = form.title.data,
             date = datetime.now(ZoneInfo("America/Sao_Paulo")),
             body = form.body.data,
             user_id = current_user.id,
+            post_pic = picture_file,
         )
         
         db.session.add(new_post)
@@ -152,6 +158,11 @@ def edit_post(post_id):
         post_to_edit.title = form.title.data
         post_to_edit.body = form.body.data
         post_to_edit.date = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        
+        if form.post_pic.data:
+            picture_file = save_post_pic(form.post_pic.data)
+            post_to_edit.post_pic = picture_file
+
         current_app.logger.info(f"User {current_user.username} (ID:{current_user.id}) edited the post {post_id}")
 
         

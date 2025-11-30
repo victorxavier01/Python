@@ -5,13 +5,20 @@
 {% block content %}
 <div class="form">
     <h2>Create A New Post</h2>
-    <form method="POST" action="{{ url_for('user.create_post') }}">
+    <form method="POST" action="{{ url_for('user.create_post') }}" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
+
         {{ form.title.label(class_="form-label") }}
         {{ form.title(class_="form-input") }}
+
         {{ form.body.label(class_="form-label") }}
-        {{ form.body(class="form-input") }} 
+        {{ form.body(class="form-input") }}
+
+        {{ form.post_pic.label(class_="form-label") }}
+        {{ form.post_pic(class_="form-input") }}
+
         {{ form.submit(class_="btn btn-primary") }}
+        
     </form>
 </div>
 {% endblock %}

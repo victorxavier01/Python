@@ -8,17 +8,20 @@
 {% for post in posts %}
 <div class="post">
     <div class="post-author">
-        <img src="{{ url_for('static', filename = 'profile_pics/' + (post.author.profile_pic or 'default.png')) }}" 
+        <img src="{{ url_for('static', filename = 'profile_pics/' + (post.author.profile_pic or 'default.png')) }}" class="author-pic" 
              alt="{{ post.author.username }} profile picture" width="40" height="40">
         {{ post.author.username }}
     </div>
-    <p>{{ post.date.strftime("%d/%m/%Y %H:%M") }}</p>
+    <p>{{ post.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
+    <img src="{{ url_for('static', filename='post_pics/' ~ post.post_pic) }}" alt="imagem do post" class="post-pic">
+
     <h3>{{ post.title }}</h3>
     <p>{{ post.body }}</p>
     <a href="{{ url_for('user.see_post', post_id = post.id) }}">Read more</a>
     <form action="{{ url_for('user.delete_post', post_id = post.id) }}" method="post" style="display:inline;">
         <button type="submit" class="">Delete post</button>
     </form>
+
     {% if post.author.id == current_user.id %}
     <a href="{{ url_for('user.edit_post', post_id = post.id) }}">Edit post</a>
     {% endif %}
