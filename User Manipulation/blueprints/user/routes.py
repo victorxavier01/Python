@@ -5,7 +5,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from extensions import db
 from models import User, Post
 from .utils import save_profile_pic
-from datetime import date
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 user_bp = Blueprint("user", __name__, url_prefix="/user")
 
@@ -95,7 +96,7 @@ def create_post():
     if form.validate_on_submit():
         new_post = Post(
             title = form.title.data,
-            date = date.today().strftime("%d/%b/%Y"),
+            date = datetime.now(ZoneInfo("America/Sao_Paulo")),
             body = form.body.data,
             user_id = current_user.id,
         )
@@ -123,7 +124,7 @@ def see_post(post_id):
 
     if not post_to_see:
         flash("Post not found", "danger")
-        return redirect(url_for("home.home"))
+        return redirect(url_for("user.see_all_posts"))
     
     return render_template("see_post.html", post = post_to_see)
 
@@ -142,13 +143,14 @@ def edit_post(post_id):
 
     post_to_edit = Post.query.get_or_404(post_id)
 
-    if post_to_edit.user_id != current_user.id:
+    if post_to_edit.user_id != current_user.id and not current_user.is_admin:
         flash("You have not permission to edit this post", "danger")
+        current_app.logger.warning(f"User {current_user.username} (ID:{current_user.id}) tried to edit post {post_id} without permission")
         return redirect(url_for("home.home"))
 
     if form.validate_on_submit():
         post_to_edit.title = form.title.data
-        post_to_edit.content = form.content.data
+        post_to_edit.body = form.body.data
         
         db.session.commit()
 
@@ -157,9 +159,9 @@ def edit_post(post_id):
     
     if request.method == "GET":
         form.title.data = post_to_edit.title
-        form.content.data = post_to_edit.content
+        form.body.data = post_to_edit.body
 
-    return render_template("edit_post", form = form, post = post_to_edit)
+    return render_template("edit_post.html", form = form, post = post_to_edit)
 
 @user_bp.route("/delete_post/<int:post_id>", methods=["POST"])
 @login_required

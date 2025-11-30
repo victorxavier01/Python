@@ -6,7 +6,7 @@
 {% if current_user.is_authenticated %}
         <div class="post">
             <p>{{ current_user.username }}</p>
-            <p>{{ post.date }}</p>
+            <p>{{ post.date.strftime("%d/%m/%Y") }}</p>
             <h2>{{ post.title }}</h2>
             <p>{{ post.body }}</p>
         </div>

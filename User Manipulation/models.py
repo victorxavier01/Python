@@ -2,6 +2,7 @@ from extensions import db, login_manager
 from flask_login import UserMixin
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, ForeignKey, Boolean, Text
+from datetime import datetime, timezone
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
@@ -22,7 +23,7 @@ class Post(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     body: Mapped[str] = mapped_column(Text, nullable=False)
-    date: Mapped[str] = mapped_column(String(50))
+    date = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     author = relationship("User", back_populates="posts")

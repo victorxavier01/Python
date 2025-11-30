@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Post{% endblock %}
+
+{% block content %}
+<h2>Edit Post</h2>
+
+<div class="post">
+    <div class="post-author">
+        <img src="{{ url_for('static', filename = 'profile_pics/' + (post.author.profile_pic or 'default.png')) }}" 
+             alt="{{ post.author.username }} profile picture" width="40" height="40">
+        {{ post.author.username }}
+    </div>
+    <p>{{ post.date }}</p>
+    <h3>{{ post.title }}</h3>
+    <p>{{ post.body }}</p>
+</div>
+<hr>
+
+{% endblock %}
