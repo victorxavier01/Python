@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, current_app, redirect, url_for, flash, request
 from flask_login import current_user, login_user, logout_user, login_required
-from .forms import RegisterForm, LoginForm, PostForm, EditPostForm
+from .forms import RegisterForm, LoginForm, PostForm, EditPostForm, CommentForm
 from werkzeug.security import check_password_hash, generate_password_hash
 from extensions import db
-from models import User, Post, Likes
+from models import User, Post, Likes, Comments
 from .utils import save_profile_pic, save_post_pic
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -126,21 +126,57 @@ def my_profile():
 @user_bp.route("/see_post/<int:post_id>", methods=["GET", "POST"])
 @login_required
 def see_post(post_id):
+    form = CommentForm()
+
     post_to_see = Post.query.get_or_404(post_id)
-
-    if not post_to_see:
-        flash("Post not found", "danger")
-        return redirect(url_for("user.see_all_posts"))
     
-    return render_template("see_post.html", post = post_to_see)
+    if form.validate_on_submit():
+        new_comment = Comments(
+            user_id = current_user.id,
+            post_id = post_id,
+            body = form.body.data,
+            date = datetime.now(ZoneInfo("America/Sao_Paulo")),
+        )
 
-@user_bp.route("/see_all_posts")
+        db.session.add(new_comment)
+        db.session.commit()
+
+        current_app.logger.info(f"{current_user.username} (ID:{current_user.id}) has commented on {post_to_see.author.username}'s post ID: {post_to_see.id}")
+
+        flash("Comment added!", "success")
+
+        return redirect(url_for("user.see_post", post_id = post_id))
+    
+    return render_template("see_post.html", post = post_to_see, form = form)
+
+@user_bp.route("/see_all_posts", methods=["GET", "POST"])
 @login_required
 def see_all_posts():
+    form = CommentForm()
 
     posts = Post.query.order_by(Post.date.desc()).all()
 
-    return render_template("see_all_posts.html", posts = posts)
+    if form.validate_on_submit():
+        post_id = int(form.post_id.data)
+        post_to_see = Post.query.get_or_404(post_id)
+
+        new_comment = Comments(
+            user_id = current_user.id,
+            post_id = post_id,
+            body = form.body.data,
+            date = datetime.now(ZoneInfo("America/Sao_Paulo")),
+        )
+
+        db.session.add(new_comment)
+        db.session.commit()
+
+        current_app.logger.info(f"{current_user.username} (ID:{current_user.id}) has commented on {post_to_see.author.username}'s post ID: {post_to_see.id}")
+
+        flash("Comment added!", "success")
+
+        return redirect(url_for("user.see_post", post_id = post_id))
+
+    return render_template("see_all_posts.html", posts=posts, form=form)
 
 @user_bp.route("/edit_post/<int:post_id>", methods=["GET", "POST"])
 @login_required
@@ -223,5 +259,7 @@ def like_post(post_id):
     return redirect(url_for("user.see_all_posts"))
 
 
-
-
+@user_bp.route("/like_comment/<int:comment_id>", methods=['GET', 'POST'])
+@login_required
+def like_post(comment_id):
+    pass
