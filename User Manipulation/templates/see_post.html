@@ -10,6 +10,11 @@
             <h2>{{ post.title }}</h2>
             <p>{{ post.body }}</p>
             <img src="{{ url_for('static', filename='post_pics/' ~ post.post_pic) }}" alt="imagem do post" class="post-pic">
+            <form action="{{ url_for('user.like_post', post_id = post.id) }}" method="POST">
+                <button type = "submit" class="btn btn-primary">Like</button>
+            </form>
+            <p>{{ post.likes|length }}</p>
+
         </div>
 {% endif %}
 {% endblock %}

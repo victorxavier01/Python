@@ -1,11 +1,13 @@
 from extensions import db, login_manager
 from flask_login import UserMixin
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import Integer, String, ForeignKey, Boolean, Text
+from sqlalchemy import Integer, String, ForeignKey, Boolean, Text, Table, Column
 from datetime import datetime, timezone
+from typing import List
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
+
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     username: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
@@ -14,7 +16,8 @@ class User(UserMixin, db.Model):
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     profile_pic: Mapped[str] = mapped_column(String(250), nullable=True, default="default.png")
 
-    posts = relationship("Post", back_populates="author", cascade="all, delete-orphan")
+    posts = relationship("Post", back_populates = "author", cascade = "all, delete-orphan")
+    likes: Mapped[List["Likes"]] = relationship("Likes", back_populates = "author", cascade="all, delete-orphan")
 
 
 class Post(db.Model):
@@ -27,8 +30,18 @@ class Post(db.Model):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     post_pic: Mapped[str] = mapped_column(String(250), nullable=True, default="default.png")
 
-    author = relationship("User", back_populates="posts")
+    author = relationship("User", back_populates = "posts")
+    likes: Mapped[List["Likes"]] = relationship("Likes", back_populates = "post", cascade="all, delete-orphan")
 
+class Likes(db.Model):
+    __tablename__ = "likes"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id", ondelete="CASCADE"), nullable=False)
+
+    author = relationship("User", back_populates="likes")
+    post = relationship("Post", back_populates="likes")
 
 @login_manager.user_loader
 def load_user(user_id):

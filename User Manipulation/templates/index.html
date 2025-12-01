@@ -19,9 +19,6 @@
     {% endif %}
     
 </nav>
-    {% if current_user.is_authenticated %}
-        <p>Welcome, {{ current_user.username }}</p>
-    {% endif %}
 <h1>Home page</h1>
 {% if current_user.is_authenticated %}
     <p>Welcome, {{ current_user.username }}</p>

@@ -18,15 +18,16 @@ __pycache__/
 *.pyo
 *.pyd
 
-# venv
+# Venv
 venv/
 env/
 .venv/
 .env/
 
-# 
+# Photos
 static/profile_pics/
-!static/profile_pics/default.png  # mantém a foto padrão
+!static/profile_pics/default.png
+static/post_pics/
 
 # Werkzeug
 *.pid

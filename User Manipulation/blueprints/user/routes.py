@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from .forms import RegisterForm, LoginForm, PostForm, EditPostForm
 from werkzeug.security import check_password_hash, generate_password_hash
 from extensions import db
-from models import User, Post
+from models import User, Post, Likes
 from .utils import save_profile_pic, save_post_pic
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -83,7 +83,7 @@ def register():
 @user_bp.route("/logout")
 @login_required
 def logout():
-    current_app.logger.info(f"User {current_user.username} (ID:{current_user.id}) has logged out.")
+    current_app.logger.info(f"User {current_user.username} (ID:{current_user.id}) has logged out")
     logout_user()
     return redirect(url_for("home.home"))
 
@@ -112,14 +112,14 @@ def create_post():
 
         current_app.logger.info("Post created successfully!")
 
-        return redirect(url_for("user.see_post", post_id=new_post.id))
+        return redirect(url_for("user.see_post", post_id = new_post.id))
 
-    return render_template("create_post.html", form=form)
+    return render_template("create_post.html", form = form)
 
 @user_bp.route("/my_profile", methods=["GET", "POST"])
 @login_required
 def my_profile():
-    user_posts = Post.query.filter_by(user_id=current_user.id).all()
+    user_posts = Post.query.filter_by(user_id = current_user.id).all()
 
     return render_template("my_profile.html", posts = user_posts)
 
@@ -184,7 +184,7 @@ def delete_post(post_id):
 
     if post_to_delete.user_id != current_user.id and not current_user.is_admin:
         flash("You do not have permission to delete this post.", "danger")
-        current_app.logger.warning(f"User {current_user.username} (ID:{current_user.id}) tried to delete post {post_id} without permission")
+        current_app.logger.warning(f"User {current_user.username} (ID:{current_user.id}) tried to delete {post_to_delete.author}'s post (ID:{post_id}) without permission")
         return redirect(url_for("user.see_all_posts"))
 
     db.session.delete(post_to_delete)
@@ -194,3 +194,34 @@ def delete_post(post_id):
     flash("Post deleted successfully!", "success")
     return redirect(url_for("user.see_all_posts"))
     
+@user_bp.route("/like_post/<int:post_id>", methods=['GET', 'POST'])
+@login_required
+def like_post(post_id):
+
+    post = Post.query.get_or_404(post_id)
+
+    check_like = Likes.query.filter_by(user_id = current_user.id, post_id = post_id).first()
+
+    if check_like:
+        db.session.delete(check_like)
+        db.session.commit()
+
+        current_app.logger.info(f"{current_user.username} (ID:{current_user.id}) has unliked {post.author.username}'s post (post ID:{post_id})")
+
+        return redirect(url_for("user.see_all_posts"))
+
+    like = Likes(
+        user_id = current_user.id,
+        post_id = post.id
+    )
+
+    db.session.add(like)
+    db.session.commit()
+
+    current_app.logger.info(f"{current_user.username} (ID:{current_user.id}) has liked {post.author.username}'s post {post_id}") 
+
+    return redirect(url_for("user.see_all_posts"))
+
+
+
+
