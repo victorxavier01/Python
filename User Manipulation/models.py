@@ -29,7 +29,7 @@ class Post(db.Model):
     body: Mapped[str] = mapped_column(Text, nullable=False)
     date = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete = "CASCADE"), nullable=False)
-    post_pic: Mapped[str] = mapped_column(String(250), nullable=True, default = "default.png")
+    post_pic: Mapped[str] = mapped_column(String(250), nullable=True)
 
     author = relationship("User", back_populates = "posts")
     likes: Mapped[List["Likes"]] = relationship("Likes", back_populates = "post", cascade = "all, delete-orphan")

@@ -96,8 +96,6 @@ def create_post():
     if form.validate_on_submit():
         if form.post_pic.data:
             picture_file = save_post_pic(form.post_pic.data)
-        else:
-            picture_file = "default.png"
 
         new_post = Post(
             title = form.title.data,
@@ -123,17 +121,20 @@ def my_profile():
 
     return render_template("my_profile.html", posts = user_posts)
 
+# Comments function also goes here
 @user_bp.route("/see_post/<int:post_id>", methods=["GET", "POST"])
 @login_required
 def see_post(post_id):
+    post_to_see = Post.query.get_or_404(post_id)
+
     form = CommentForm()
 
-    post_to_see = Post.query.get_or_404(post_id)
+    form.post_id.data = post_id 
     
     if form.validate_on_submit():
         new_comment = Comments(
             user_id = current_user.id,
-            post_id = post_id,
+            post_id = form.post_id.data,
             body = form.body.data,
             date = datetime.now(ZoneInfo("America/Sao_Paulo")),
         )
@@ -149,6 +150,7 @@ def see_post(post_id):
     
     return render_template("see_post.html", post = post_to_see, form = form)
 
+# Comments function also goes here
 @user_bp.route("/see_all_posts", methods=["GET", "POST"])
 @login_required
 def see_all_posts():
@@ -258,8 +260,25 @@ def like_post(post_id):
 
     return redirect(url_for("user.see_all_posts"))
 
-
 @user_bp.route("/like_comment/<int:comment_id>", methods=['GET', 'POST'])
 @login_required
-def like_post(comment_id):
-    pass
+def like_comment(comment_id):
+    comment_to_like = Comments.query.get_or_404(comment_id)
+
+    check_comment_like = Likes.query.filter_by(user_id = current_user.id, comment_id = comment_id).first()
+
+    if check_comment_like:
+        db.session.delete(check_comment_like)
+        db.session.commit()
+
+        return redirect(url_for("user.see_post", post_id = comment_to_like.post_id))
+    
+    like = Likes(
+        user_id = current_user.id,
+        comment_id = comment_id
+    )
+
+    db.session.add(like)
+    db.session.commit()
+
+    return redirect(url_for("user.see_post", post_id = comment_to_like.post_id))

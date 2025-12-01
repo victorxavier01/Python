@@ -5,7 +5,9 @@
 {% block content %}
 {% if current_user.is_authenticated %}
         <div class="post">
-            <p>{{ current_user.username }}</p>
+            <img src="{{ url_for('static', filename = 'profile_pics/' + (post.author.profile_pic or 'default.png')) }}" class="author-pic" 
+             alt="{{ post.author.username }} profile picture" width="40" height="40">
+            <p>{{ post.author.username }}</p>
             <p>{{ post.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
             <h2>{{ post.title }}</h2>
             <p>{{ post.body }}</p>
@@ -14,6 +16,8 @@
             <form action="{{ url_for('user.like_post', post_id = post.id) }}" method="POST">
                 <button type = "submit" class="btn btn-primary">Like</button>
             </form>
+
+            <a href="{{ url_for('user.edit_post', post_id = post.id) }}">Edit Post</a>
 
             <p>{{ post.likes|length }}</p>
 
@@ -25,6 +29,8 @@
             {% for comment in post.comments %}
 
             <div class="single-comment">
+                <img src="{{ url_for('static', filename = 'profile_pics/' + (comment.author.profile_pic or 'default.png')) }}" class="author-pic" 
+                alt="{{ comment.author.username }} profile picture" width="40" height="40">
                 <p>{{ comment.author.username }}</p>
                 <p>{{comment.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
                 <p>{{ comment.body|safe }}</p>
@@ -33,12 +39,16 @@
                 </form>
                 <p>{{ comment.likes|length }}</p>
             </div>
+
             {% endfor %}
+
             <form action="{{ url_for('user.see_post', post_id = post.id) }}" method = "POST">
                 {{ form.hidden_tag() }}
 
                 {{ form.body.label }}
                 {{ form.body(rows = 3, class_="form-control") }}
+
+                {{ form.post_id }}
 
                 {{ form.submit(class_="btn btn-primary") }}
             </form>

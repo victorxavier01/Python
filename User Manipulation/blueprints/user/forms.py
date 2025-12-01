@@ -30,6 +30,6 @@ class EditPostForm(FlaskForm):
     submit = SubmitField("Confirm Edit")
 
 class CommentForm(FlaskForm):
-    body = TextAreaField("Body", validators=[DataRequired()])
+    body = TextAreaField("What do you think?", validators=[DataRequired()])
     post_id = HiddenField("Post ID", validators=[DataRequired()])
     submit = SubmitField("Comment")
