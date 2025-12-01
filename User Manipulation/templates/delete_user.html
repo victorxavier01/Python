@@ -17,10 +17,10 @@
         {% endfor %}
     </select>
 </form>
-{% with messages = get_flashed_messages(with_categories=true) %}
+{% with messages = get_flashed_messages(category_filter=["delete_user"]) %}
   {% if messages %}
     {% for category, message in messages %}
-      <div class="alert alert-{{ category }} mt-3">
+      <div class="alert alert-danger mt-3">
         {{ message }}
       </div>
     {% endfor %}

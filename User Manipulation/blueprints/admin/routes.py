@@ -38,7 +38,7 @@ def admin_edit_user():
     if user_id:
         selected_user = db.session.get(User, user_id)
         if not selected_user:
-            flash("User not found", "danger")
+            flash("User not found", "delete_user")
             return redirect(url_for("admin.admin_edit_user"))
 
     if request.method == "GET" and selected_user:
@@ -79,17 +79,17 @@ def delete_user():
     if user_id:
         selected_user = db.session.get(User, user_id)
         if not selected_user:
-            flash("User not found", "danger")
+            flash("User not found", "delete_user")
             return redirect(url_for("admin.delete_user"))
         
         if selected_user.is_admin:
             current_app.logger.error(f"Admin {current_user.username} (ID:{current_user.id}) is trying to delete another admin ({selected_user.username} | ID:({selected_user.id}))")
-            flash("You can not delete another admin", "danger")
+            flash("You can not delete another admin", "delete_user")
             return redirect(url_for("admin.delete_user"))
         
         if selected_user.id == current_user.id:
             current_app.logger.error(f"Admin {current_user.username} (ID:{current_user.id}) is trying to delete himself")
-            flash("You cannot delete yourself", "danger")
+            flash("You cannot delete yourself", "delete_user")
             return redirect(url_for("admin.delete_user"))
     
     form = DeleteForm()
