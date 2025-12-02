@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Share Post{% endblock %}
+
+{% block content %}
+{% if current_user.is_authenticated %}
+
+    <h2>Compartilhar post</h2>
+    <form action="{{ url_for('user.share_post', post_id=post.id) }}" method="POST">
+        {{ form.hidden_tag() }}
+        {{ form.body.label }}
+        {{ form.body(rows=3, class_="form-control") }}
+        {{ form.submit(class_="btn btn-primary") }}
+    </form>
+
+    <div class="original-post">
+        <img src="{{ url_for('static', filename='profile_pics/' + (post.author.profile_pic or 'default.png')) }}"
+             class="author-pic" width="40" height="40">
+
+        <p>{{ post.author.username }}</p>
+        <p>{{ post.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
+
+        <h3>{{ post.title }}</h3>
+        <p>{{ post.body }}</p>
+
+        {% if post.post_pic %}
+            <img src="{{ url_for('static', filename='post_pics/' ~ post.post_pic) }}" class="post-pic">
+        {% endif %}
+    </div>
+
+{% endif %}
+{% endblock %}

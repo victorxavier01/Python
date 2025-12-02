@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Shared Post{% endblock %}
+
+{% block content %}
+{% if current_user.is_authenticated %}
+
+    <!-- SHARER -->
+    <div class = "sharer">
+        <img src = "{{ url_for('static', filename = 'profile_pics/' + (post.author.profile_pic or 'default.png')) }}"
+             class = "author-pic" width = "40" height = "40">
+
+        <p>{{ post.author.username }} compartilhou</p>
+        <p>{{ post.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
+        <p>{{ post.body }}</p>
+    </div>
+
+    <!-- ORIGINAL POSTER -->
+    <div class = "shared-post">
+        <img src = "{{ url_for('static', filename = 'profile_pics/' + (post.post.author.profile_pic or 'default.png')) }}"
+             class = "author-pic" width = "40" height = "40">
+
+        <p>{{ post.post.author.username }}</p>
+        <p>{{ post.post.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
+
+        <h3>{{ post.post.title }}</h3>
+        <p>{{ post.post.body }}</p>
+
+        {% if post.post.post_pic %}
+        <img src = "{{ url_for('static', filename = 'post_pics/' + post.post.post_pic) }}"
+             class = "post-pic">
+        {% endif %}
+    </div>
+
+    <!-- INTERACTIONS -->
+    <div class = "interactions">
+
+        <!-- TODO -->
+        <form action = "{{ url_for('user.like_post', post_id = post.id) }}" method = "POST">
+            <button type = "submit" class = "btn btn-primary">Like</button>
+        </form>
+        <p>{{ post.likes | length }}</p>
+
+        <!-- Comments -->
+        <div class = "comments">
+            <h3>Comments</h3>
+            <form action="{{ url_for('user.see_shared_post', shared_post_id=post.id) }}" method="POST">
+                {{ form.hidden_tag() }}
+                {{ form.body(rows=3, class_="form-control") }}
+                {{ form.submit(class_="btn btn-primary") }}
+            </form>
+
+            {% for comment in comments %}
+            <div class = "single-comment">
+                <img src = "{{ url_for('static', filename = 'profile_pics/' + (comment.author.profile_pic or 'default.png')) }}"
+                     class = "author-pic" width = "40" height = "40">
+
+                <p>{{ comment.author.username }}</p>
+                <p>{{ comment.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
+                <p>{{ comment.body|safe }}</p>
+
+                <form action = "{{ url_for('user.like_comment', comment_id = comment.id) }}" method = "POST">
+                    <button type = "submit" class = "btn btn-primary">Like</button>
+                </form>
+
+                <p>{{ comment.likes | length }}</p>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+{% endif %}
+{% endblock %}

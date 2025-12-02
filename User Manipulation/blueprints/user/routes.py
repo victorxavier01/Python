@@ -1,16 +1,16 @@
 from flask import Blueprint, render_template, current_app, redirect, url_for, flash, request
 from flask_login import current_user, login_user, logout_user, login_required
-from .forms import RegisterForm, LoginForm, PostForm, EditPostForm, CommentForm
+from .forms import RegisterForm, LoginForm, PostForm, EditPostForm, CommentForm, SharePostForm
 from werkzeug.security import check_password_hash, generate_password_hash
 from extensions import db
-from models import User, Post, Likes, Comments
+from models import User, Post, Likes, Comments, Shared
 from .utils import save_profile_pic, save_post_pic
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
 user_bp = Blueprint("user", __name__, url_prefix="/user")
 
-@user_bp.route('/login', methods=["GET", "POST"])
+@user_bp.route('/login', methods = ["GET", "POST"])
 def login():
     current_app.logger.info("Usuário acessou a página de login")
 
@@ -37,7 +37,7 @@ def login():
         
     return render_template("login.html", form=form)
 
-@user_bp.route('/register', methods=["GET", "POST"])
+@user_bp.route('/register', methods = ["GET", "POST"])
 def register():
     current_app.logger.info("Usuário acessou a página de registro")
 
@@ -87,7 +87,7 @@ def logout():
     logout_user()
     return redirect(url_for("home.home"))
 
-@user_bp.route("/create_post", methods=["GET", "POST"])
+@user_bp.route("/create_post", methods = ["GET", "POST"])
 @login_required
 def create_post():
     current_app.logger.info(f"User {current_user.username} (ID:{current_user.id}) accessed the create post page.")
@@ -114,7 +114,7 @@ def create_post():
 
     return render_template("create_post.html", form = form)
 
-@user_bp.route("/my_profile", methods=["GET", "POST"])
+@user_bp.route("/my_profile", methods = ["GET", "POST"])
 @login_required
 def my_profile():
     user_posts = Post.query.filter_by(user_id = current_user.id).all()
@@ -122,7 +122,7 @@ def my_profile():
     return render_template("my_profile.html", posts = user_posts)
 
 # Comments function also goes here
-@user_bp.route("/see_post/<int:post_id>", methods=["GET", "POST"])
+@user_bp.route("/see_post/<int:post_id>", methods = ["GET", "POST"])
 @login_required
 def see_post(post_id):
     post_to_see = Post.query.get_or_404(post_id)
@@ -151,7 +151,7 @@ def see_post(post_id):
     return render_template("see_post.html", post = post_to_see, form = form)
 
 # Comments function also goes here
-@user_bp.route("/see_all_posts", methods=["GET", "POST"])
+@user_bp.route("/see_all_posts", methods = ["GET", "POST"])
 @login_required
 def see_all_posts():
     form = CommentForm()
@@ -180,7 +180,7 @@ def see_all_posts():
 
     return render_template("see_all_posts.html", posts=posts, form=form)
 
-@user_bp.route("/edit_post/<int:post_id>", methods=["GET", "POST"])
+@user_bp.route("/edit_post/<int:post_id>", methods = ["GET", "POST"])
 @login_required
 def edit_post(post_id):
     form = EditPostForm()
@@ -215,7 +215,7 @@ def edit_post(post_id):
 
     return render_template("edit_post.html", form = form, post = post_to_edit)
 
-@user_bp.route("/delete_post/<int:post_id>", methods=["POST"])
+@user_bp.route("/delete_post/<int:post_id>", methods = ["POST"])
 @login_required
 def delete_post(post_id):
     post_to_delete = Post.query.get_or_404(post_id)
@@ -232,7 +232,7 @@ def delete_post(post_id):
     flash("Post deleted successfully!", "success")
     return redirect(url_for("user.see_all_posts"))
     
-@user_bp.route("/like_post/<int:post_id>", methods=['GET', 'POST'])
+@user_bp.route("/like_post/<int:post_id>", methods = ["GET", "POST"])
 @login_required
 def like_post(post_id):
 
@@ -260,7 +260,7 @@ def like_post(post_id):
 
     return redirect(url_for("user.see_all_posts"))
 
-@user_bp.route("/like_comment/<int:comment_id>", methods=['GET', 'POST'])
+@user_bp.route("/like_comment/<int:comment_id>", methods = ["GET", "POST"])
 @login_required
 def like_comment(comment_id):
     comment_to_like = Comments.query.get_or_404(comment_id)
@@ -282,3 +282,71 @@ def like_comment(comment_id):
     db.session.commit()
 
     return redirect(url_for("user.see_post", post_id = comment_to_like.post_id))
+
+@user_bp.route("/share_post/<int:post_id>", methods = ["GET", "POST"])
+@login_required
+def share_post(post_id):
+    post_to_share = Post.query.get_or_404(post_id)
+
+    form = SharePostForm()
+
+    if form.validate_on_submit():
+        post = Shared(
+            user_id = current_user.id,
+            post_id = post_id ,
+            body = form.body.data,
+            date = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        )
+
+        db.session.add(post)
+        db.session.commit()
+
+        return redirect(url_for("user.see_shared_post", shared_post_id = post.id))
+
+    return render_template("share_post.html", post = post_to_share, form = form)
+
+@user_bp.route("/see_shared_post/<int:shared_post_id>", methods=["GET", "POST"])
+@login_required
+def see_shared_post(shared_post_id):
+    post_to_see = Shared.query.get_or_404(shared_post_id)
+
+    form = CommentForm()
+
+    comments = Comments.query.filter_by(shared_id=shared_post_id).order_by(Comments.date).all()
+
+    if form.validate_on_submit():
+
+        comment = Comments(
+            user_id=current_user.id,
+            post_id=None,
+            shared_id=shared_post_id,
+            body=form.body.data,
+            date=datetime.now(ZoneInfo("America/Sao_Paulo"))
+        )
+
+        db.session.add(comment)
+        db.session.commit()
+
+        return redirect(url_for("user.see_shared_post", shared_post_id=shared_post_id))
+
+    return render_template("shared.html", post=post_to_see, comments=comments, form=form)
+
+@user_bp.route("/comment_shared/<int:shared_id>", methods=["POST"])
+@login_required
+def comment_shared_post(shared_id):
+    post = Shared.query.get_or_404(shared_id)
+    form = CommentForm()
+
+    if form.validate_on_submit():
+        current_app.logger.info("Comentário recebido na rota comment_shared_post: %s", form.body.data)
+        comment = Comments(
+            body = form.body.data,
+            user_id = current_user.id,
+            shared_id = shared_id,
+            date = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        )
+        
+        db.session.add(comment)
+        db.session.commit()
+
+    return redirect(url_for("user.see_shared_post", shared_post_id = shared_id))

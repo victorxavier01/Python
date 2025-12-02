@@ -31,5 +31,9 @@ class EditPostForm(FlaskForm):
 
 class CommentForm(FlaskForm):
     body = TextAreaField("What do you think?", validators=[DataRequired()])
-    post_id = HiddenField("Post ID", validators=[DataRequired()])
+    post_id = HiddenField("Post ID")
     submit = SubmitField("Comment")
+
+class SharePostForm(FlaskForm):
+    body = TextAreaField("What do you think?", validators=[DataRequired()])
+    submit = SubmitField("Share")
