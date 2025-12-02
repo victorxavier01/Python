@@ -260,28 +260,34 @@ def like_post(post_id):
 
     return redirect(url_for("user.see_all_posts"))
 
-@user_bp.route("/like_comment/<int:comment_id>", methods = ["GET", "POST"])
+@user_bp.route("/like_comment/<int:comment_id>", methods=["POST"])
 @login_required
 def like_comment(comment_id):
     comment_to_like = Comments.query.get_or_404(comment_id)
 
-    check_comment_like = Likes.query.filter_by(user_id = current_user.id, comment_id = comment_id).first()
+    existing_like = Likes.query.filter_by(
+        user_id=current_user.id,
+        comment_id=comment_id
+    ).first()
 
-    if check_comment_like:
-        db.session.delete(check_comment_like)
+    if existing_like:
+        db.session.delete(existing_like)
+        db.session.commit()
+    else:
+        like = Likes(
+            user_id=current_user.id,
+            comment_id=comment_id
+        )
+        db.session.add(like)
         db.session.commit()
 
+    if comment_to_like.post_id:
         return redirect(url_for("user.see_post", post_id = comment_to_like.post_id))
-    
-    like = Likes(
-        user_id = current_user.id,
-        comment_id = comment_id
-    )
 
-    db.session.add(like)
-    db.session.commit()
+    if comment_to_like.shared_id:
+        return redirect(url_for("user.see_shared_post", shared_post_id = comment_to_like.shared_id))
 
-    return redirect(url_for("user.see_post", post_id = comment_to_like.post_id))
+    return redirect(url_for("user.see_all_posts"))
 
 @user_bp.route("/share_post/<int:post_id>", methods = ["GET", "POST"])
 @login_required
@@ -317,19 +323,19 @@ def see_shared_post(shared_post_id):
     if form.validate_on_submit():
 
         comment = Comments(
-            user_id=current_user.id,
-            post_id=None,
-            shared_id=shared_post_id,
-            body=form.body.data,
-            date=datetime.now(ZoneInfo("America/Sao_Paulo"))
+            user_id = current_user.id,
+            post_id = None,
+            shared_id = shared_post_id,
+            body = form.body.data,
+            date = datetime.now(ZoneInfo("America/Sao_Paulo"))
         )
 
         db.session.add(comment)
         db.session.commit()
 
-        return redirect(url_for("user.see_shared_post", shared_post_id=shared_post_id))
+        return redirect(url_for("user.see_shared_post", shared_post_id = shared_post_id))
 
-    return render_template("shared.html", post=post_to_see, comments=comments, form=form)
+    return render_template("shared.html", post = post_to_see, comments = comments, form = form)
 
 @user_bp.route("/comment_shared/<int:shared_id>", methods=["POST"])
 @login_required
@@ -347,6 +353,27 @@ def comment_shared_post(shared_id):
         )
         
         db.session.add(comment)
+        db.session.commit()
+
+    return redirect(url_for("user.see_shared_post", shared_post_id = shared_id))
+
+@user_bp.route("/like_shared/<int:shared_id>", methods=["POST"])
+@login_required
+def like_shared_post(shared_id):
+    shared_post = Shared.query.get_or_404(shared_id)
+
+    existing_like = Likes.query.filter_by(
+        user_id=current_user.id,
+        shared_id=shared_id
+    ).first()
+
+    if existing_like:
+        db.session.delete(existing_like)
+        db.session.commit()
+
+    else:
+        like = Likes(user_id=current_user.id, shared_id=shared_id)
+        db.session.add(like)
         db.session.commit()
 
     return redirect(url_for("user.see_shared_post", shared_post_id = shared_id))

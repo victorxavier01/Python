@@ -36,7 +36,7 @@
     <div class = "interactions">
 
         <!-- TODO -->
-        <form action = "{{ url_for('user.like_post', post_id = post.id) }}" method = "POST">
+        <form action="{{ url_for('user.like_shared_post', shared_id = post.id) }}" method="POST">
             <button type = "submit" class = "btn btn-primary">Like</button>
         </form>
         <p>{{ post.likes | length }}</p>
@@ -44,7 +44,7 @@
         <!-- Comments -->
         <div class = "comments">
             <h3>Comments</h3>
-            <form action="{{ url_for('user.see_shared_post', shared_post_id=post.id) }}" method="POST">
+            <form action="{{ url_for('user.see_shared_post', shared_post_id = post.id) }}" method="POST">
                 {{ form.hidden_tag() }}
                 {{ form.body(rows=3, class_="form-control") }}
                 {{ form.submit(class_="btn btn-primary") }}
