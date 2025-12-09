@@ -84,16 +84,21 @@ def register():
 @login_required
 def logout():
     current_app.logger.info(f"User {current_user.username} (ID:{current_user.id}) has logged out")
+
     logout_user()
+
     return redirect(url_for("home.home"))
 
 @user_bp.route("/create_post", methods = ["GET", "POST"])
 @login_required
 def create_post():
     current_app.logger.info(f"User {current_user.username} (ID:{current_user.id}) accessed the create post page.")
+
     form = PostForm()
 
     if form.validate_on_submit():
+        picture_file = None
+
         if form.post_pic.data:
             picture_file = save_post_pic(form.post_pic.data)
 
@@ -160,7 +165,11 @@ def see_post(post_id):
 def see_all_posts():
     form = CommentForm()
 
-    posts = Post.query.order_by(Post.date.desc()).all()
+    posts = Post.query.all()
+
+    shares = Shared.query.all()
+
+    timeline = sorted(posts + shares, key = lambda x: x.date, reverse = True)
 
     if form.validate_on_submit():
         post_id = int(form.post_id.data)
@@ -182,7 +191,7 @@ def see_all_posts():
 
         return redirect(url_for("user.see_post", post_id = post_id))
 
-    return render_template("see_all_posts.html", posts=posts, form=form)
+    return render_template("see_all_posts.html", posts = timeline, form = form)
 
 @user_bp.route("/edit_post/<int:post_id>", methods = ["GET", "POST"])
 @login_required

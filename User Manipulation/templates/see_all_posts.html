@@ -13,7 +13,60 @@
         {{ post.author.username }}
     </div>
     <p>{{ post.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
+
+    <div class="post shared">
+        <img src="{{ url_for('static', filename='profile_pics/' ~ post.author.profile_pic) }}" class="profile-pic-small" width="40px" height="40px">
+        <p><strong>{{ post.author.username }}</strong> compartilhou:</p>
+        <p>{{ post.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
+
+        {% if post.body %}
+            <p>{{ post.body }}</p>
+        {% endif %}
+
+        {# ----- CASO 1: Shared de um Post ----- #}
+        {% if post.post %}
+            <div class="original-post">
+                <img src="{{ url_for('static', filename='profile_pics/' ~ post.post.author.profile_pic) }}" class="profile-pic-small" width="30px" height="30px">
+                <p><strong>{{ post.post.author.username }}</strong> escreveu:</p>
+
+                <h4>{{ post.post.title }}</h4>
+                <p>{{ post.post.body }}</p>
+
+                {% if post.post.post_pic %}
+                    <img src="{{ url_for('static', filename='post_pics/' ~ post.post.post_pic) }}" class="post-pic">
+                {% endif %}
+            </div>
+
+        {# ----- CASO 2: Shared de um Shared ----- #}
+        {% elif post.parent_shared %}
+            <div class="original-post">
+                <p><strong>{{ post.parent_shared.author.username }}</strong> compartilhou:</p>
+
+                {% if post.parent_shared.body %}
+                    <p><em>{{ post.parent_shared.body }}</em></p>
+                {% endif %}
+
+                <div class="chained-shared">
+                    {# Aqui exibimos o post original da cadeia #}
+                    <p><strong>{{ post.parent_shared.post.author.username }}</strong> escreveu:</p>
+
+                    <h4>{{ post.parent_shared.post.title }}</h4>
+                    <p>{{ post.parent_shared.post.body }}</p>
+
+                    {% if post.parent_shared.post.post_pic %}
+                        <img src="{{ url_for('static', filename='post_pics/' ~ post.parent_shared.post.post_pic) }}" class="post-pic">
+                        {% endif %}
+                </div>
+            </div>
+
+            {% else %}
+                <p style="color:red;">Erro: este compartilhamento não tem post e nem shared!</p>
+            {% endif %}
+    </div>
+
+    {% if post.post_pic %}
     <img src="{{ url_for('static', filename='post_pics/' ~ post.post_pic) }}" alt="imagem do post" class="post-pic">
+    {% endif %}
 
     <h3>{{ post.title }}</h3>
 

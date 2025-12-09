@@ -13,6 +13,7 @@
            POST NORMAL
            ======================= #}
         <div class="post">
+            <img src="{{ url_for('static', filename='profile_pics/' ~ item.author.profile_pic) }}" class="profile-pic-small" width="40px" height="40px">
             <p><strong>{{ item.author.username }}</strong> publicou:</p>
             <p>{{ item.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
 
@@ -31,16 +32,18 @@
         POST COMPARTILHADO
         ====================== #}
         <div class="post shared">
+            <img src="{{ url_for('static', filename='profile_pics/' ~ item.author.profile_pic) }}" class="profile-pic-small" width="40px" height="40px">
             <p><strong>{{ item.author.username }}</strong> compartilhou:</p>
             <p>{{ item.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
 
             {% if item.body %}
-                <p><em>{{ item.body }}</em></p>
+                <p>{{ item.body }}</p>
             {% endif %}
 
             {# ----- CASO 1: Shared de um Post ----- #}
             {% if item.post %}
                 <div class="original-post">
+                    <img src="{{ url_for('static', filename='profile_pics/' ~ item.post.author.profile_pic) }}" class="profile-pic-small" width="30px" height="30px">
                     <p><strong>{{ item.post.author.username }}</strong> escreveu:</p>
 
                     <h4>{{ item.post.title }}</h4>
