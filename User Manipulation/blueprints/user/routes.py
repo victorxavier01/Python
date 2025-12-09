@@ -114,12 +114,16 @@ def create_post():
 
     return render_template("create_post.html", form = form)
 
-@user_bp.route("/my_profile", methods = ["GET", "POST"])
+@user_bp.route("/my_profile", methods=["GET"])
 @login_required
 def my_profile():
-    user_posts = Post.query.filter_by(user_id = current_user.id).all()
+    posts = Post.query.filter_by(user_id = current_user.id).all()
 
-    return render_template("my_profile.html", posts = user_posts)
+    shares = Shared.query.filter_by(user_id = current_user.id).all()
+
+    timeline = sorted(posts + shares, key = lambda x: x.date, reverse = True)
+
+    return render_template("my_profile.html", timeline = timeline)
 
 # Comments function also goes here
 @user_bp.route("/see_post/<int:post_id>", methods = ["GET", "POST"])
@@ -289,36 +293,46 @@ def like_comment(comment_id):
 
     return redirect(url_for("user.see_all_posts"))
 
-@user_bp.route("/share_post/<int:post_id>", methods = ["GET", "POST"])
+@user_bp.route("/share_post/<int:post_id>", methods=["GET", "POST"])
 @login_required
 def share_post(post_id):
     post_to_share = Post.query.get_or_404(post_id)
 
     form = SharePostForm()
 
+    action_url = url_for("user.share_post", post_id = post_id)
+
     if form.validate_on_submit():
-        post = Shared(
+        new_shared = Shared(
             user_id = current_user.id,
-            post_id = post_id ,
+            post_id = post_to_share.id,
+            shared_id = None,
             body = form.body.data,
             date = datetime.now(ZoneInfo("America/Sao_Paulo"))
         )
 
-        db.session.add(post)
+        db.session.add(new_shared)
         db.session.commit()
 
-        return redirect(url_for("user.see_shared_post", shared_post_id = post.id))
+        current_app.logger.info(f"{current_user.username} compartilhou o post {post_to_share.id}")
 
-    return render_template("share_post.html", post = post_to_share, form = form)
+        return redirect(url_for("user.see_shared_post", shared_post_id = new_shared.id))
 
-@user_bp.route("/see_shared_post/<int:shared_post_id>", methods=["GET", "POST"])
+    return render_template("share_post.html",
+                           post = post_to_share,
+                           form = form,
+                           action_url = action_url,
+                           is_shared = False)
+
+@user_bp.route("/see_shared_post/<int:shared_post_id>", methods = ["GET", "POST"])
 @login_required
 def see_shared_post(shared_post_id):
+    
     post_to_see = Shared.query.get_or_404(shared_post_id)
 
     form = CommentForm()
 
-    comments = Comments.query.filter_by(shared_id=shared_post_id).order_by(Comments.date).all()
+    comments = Comments.query.filter_by(shared_id = shared_post_id).order_by(Comments.date).all()
 
     if form.validate_on_submit():
 
@@ -337,7 +351,7 @@ def see_shared_post(shared_post_id):
 
     return render_template("shared.html", post = post_to_see, comments = comments, form = form)
 
-@user_bp.route("/comment_shared/<int:shared_id>", methods=["POST"])
+@user_bp.route("/comment_shared/<int:shared_id>", methods = ["POST"])
 @login_required
 def comment_shared_post(shared_id):
     post = Shared.query.get_or_404(shared_id)
@@ -357,7 +371,7 @@ def comment_shared_post(shared_id):
 
     return redirect(url_for("user.see_shared_post", shared_post_id = shared_id))
 
-@user_bp.route("/like_shared/<int:shared_id>", methods=["POST"])
+@user_bp.route("/like_shared/<int:shared_id>", methods = ["POST"])
 @login_required
 def like_shared_post(shared_id):
     shared_post = Shared.query.get_or_404(shared_id)
@@ -372,8 +386,39 @@ def like_shared_post(shared_id):
         db.session.commit()
 
     else:
-        like = Likes(user_id=current_user.id, shared_id=shared_id)
+        like = Likes(user_id=current_user.id, shared_id = shared_id)
         db.session.add(like)
         db.session.commit()
 
     return redirect(url_for("user.see_shared_post", shared_post_id = shared_id))
+
+@user_bp.route("/share_shared_post/<int:shared_post_id>", methods=["GET", "POST"])
+@login_required
+def share_shared_post(shared_post_id):
+    shared_obj = Shared.query.get_or_404(shared_post_id)
+
+    form = SharePostForm()
+
+    action_url = url_for("user.share_shared_post", shared_post_id = shared_post_id)
+
+    if form.validate_on_submit():
+        new_shared = Shared(
+            user_id = current_user.id,
+            post_id = shared_obj.post_id,
+            shared_id = shared_obj.id,
+            body = form.body.data,
+            date = datetime.now(ZoneInfo("America/Sao_Paulo"))
+        )
+
+        db.session.add(new_shared)
+        db.session.commit()
+
+        current_app.logger.info(f"{current_user.username} compartilhou o shared {shared_obj.id} (post original {shared_obj.post_id})")
+
+        return redirect(url_for("user.see_shared_post", shared_post_id = new_shared.id))
+
+    return render_template("share_post.html",
+                           post = shared_obj,
+                           form = form,
+                           action_url = action_url,
+                           is_shared = True)

@@ -91,10 +91,12 @@ class Shared(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key =  True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete = "CASCADE"), nullable = False)
     post_id: Mapped[int] = mapped_column(ForeignKey("posts.id", ondelete = "CASCADE"), nullable = False)
+    shared_id: Mapped[int] = mapped_column(ForeignKey("shared.id", ondelete="CASCADE"), nullable = True)
     body: Mapped[str] = mapped_column(Text, nullable = True)
     date = db.Column(db.DateTime, default = lambda: datetime.now(timezone.utc))
 
     likes: Mapped[List["Likes"]] = relationship("Likes", back_populates = "shared", cascade = "all, delete-orphan")
+    parent_shared = relationship("Shared", remote_side = [id], backref = "children")
 
     author = relationship("User", back_populates = "shared")
     post = relationship("Post", back_populates = "shared")

@@ -6,35 +6,82 @@
 
 {% if current_user.is_authenticated %}
 
-{% for post in posts %}
-<div class="post">
-    <div class="post-author">
-        <img src="{{ url_for('static', filename = 'profile_pics/' + (post.author.profile_pic or 'default.png')) }}" class="author-pic" 
-             alt="{{ post.author.username }} profile picture" width="40" height="40">
-        {{ post.author.username }}
-    </div>
-    <p>{{ post.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
-    <img src="{{ url_for('static', filename='post_pics/' ~ post.post_pic) }}" alt="imagem do post" class="post-pic">
+{% for item in timeline %}
 
-    <h3>{{ post.title }}</h3>
+    {% if item.__class__.__name__ == "Post" %}
+        {# =======================
+           POST NORMAL
+           ======================= #}
+        <div class="post">
+            <p><strong>{{ item.author.username }}</strong> publicou:</p>
+            <p>{{ item.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
 
-    <p>{{ post.body }}</p>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.body }}</p>
 
-    <a href="{{ url_for('user.see_post', post_id = post.id) }}">Read more</a>
+            {% if item.post_pic %}
+                <img src="{{ url_for('static', filename='post_pics/' ~ item.post_pic) }}" class="post-pic">
+            {% endif %}
 
-    <form action="{{ url_for('user.delete_post', post_id = post.id) }}" method="post" style="display:inline;">
-        <button type="submit" class="">Delete post</button>
-    </form>
+            <a href="{{ url_for('user.see_post', post_id=item.id) }}">Ver post</a>
+        </div>
 
-    <form action="{{ url_for('user.like_post', post_id = post.id) }}" method="post">
-        <button type = "submit" class="btn btn-primary">Like</button>
-    </form>
-    <p>{{ post.likes }}</p>
-    {% if post.author.id == current_user.id %}
-    <a href="{{ url_for('user.edit_post', post_id = post.id) }}">Edit post</a>
+    {% else %}
+        {# ======================
+        POST COMPARTILHADO
+        ====================== #}
+        <div class="post shared">
+            <p><strong>{{ item.author.username }}</strong> compartilhou:</p>
+            <p>{{ item.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
+
+            {% if item.body %}
+                <p><em>{{ item.body }}</em></p>
+            {% endif %}
+
+            {# ----- CASO 1: Shared de um Post ----- #}
+            {% if item.post %}
+                <div class="original-post">
+                    <p><strong>{{ item.post.author.username }}</strong> escreveu:</p>
+
+                    <h4>{{ item.post.title }}</h4>
+                    <p>{{ item.post.body }}</p>
+
+                    {% if item.post.post_pic %}
+                        <img src="{{ url_for('static', filename='post_pics/' ~ item.post.post_pic) }}" class="post-pic">
+                    {% endif %}
+                </div>
+
+            {# ----- CASO 2: Shared de um Shared ----- #}
+            {% elif item.parent_shared %}
+                <div class="original-post">
+                    <p><strong>{{ item.parent_shared.author.username }}</strong> compartilhou:</p>
+
+                    {% if item.parent_shared.body %}
+                        <p><em>{{ item.parent_shared.body }}</em></p>
+                    {% endif %}
+
+                    <div class="chained-shared">
+                        {# Aqui exibimos o post original da cadeia #}
+                        <p><strong>{{ item.parent_shared.post.author.username }}</strong> escreveu:</p>
+
+                        <h4>{{ item.parent_shared.post.title }}</h4>
+                        <p>{{ item.parent_shared.post.body }}</p>
+
+                        {% if item.parent_shared.post.post_pic %}
+                            <img src="{{ url_for('static', filename='post_pics/' ~ item.parent_shared.post.post_pic) }}" class="post-pic">
+                        {% endif %}
+                    </div>
+                </div>
+
+            {% else %}
+                <p style="color:red;">Erro: este compartilhamento não tem post e nem shared!</p>
+            {% endif %}
+        </div>
+
     {% endif %}
-</div>
-<hr>
+
+    <hr>
+
 {% endfor %}
 
 {% endif %}

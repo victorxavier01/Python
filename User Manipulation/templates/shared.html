@@ -5,66 +5,90 @@
 {% block content %}
 {% if current_user.is_authenticated %}
 
-    <!-- SHARER -->
-    <div class = "sharer">
-        <img src = "{{ url_for('static', filename = 'profile_pics/' + (post.author.profile_pic or 'default.png')) }}"
-             class = "author-pic" width = "40" height = "40">
+    <!-- POST DO USUÁRIO ATUAL -->
+    <div class="sharer">
+        <img src="{{ url_for('static', filename='profile_pics/' + (post.author.profile_pic or 'default.png')) }}"
+             class="author-pic" width="40" height="40">
 
-        <p>{{ post.author.username }} compartilhou</p>
+        <p><strong>{{ post.author.username }}</strong> compartilhou</p>
         <p>{{ post.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
-        <p>{{ post.body }}</p>
+
+        {% if post.body %}
+            <p>{{ post.body }}</p>
+        {% endif %}
     </div>
 
-    <!-- ORIGINAL POSTER -->
-    <div class = "shared-post">
-        <img src = "{{ url_for('static', filename = 'profile_pics/' + (post.post.author.profile_pic or 'default.png')) }}"
-             class = "author-pic" width = "40" height = "40">
+    <!-- SE O POST É UM COMPARTILHAMENTO DE OUTRO COMPARTILHAMENTO -->
+    {% if post.parent_shared %}
+    <!-- MOSTRA APENAS SE FOR UM COMPARTILHAMENTO DE OUTRO COMPARTILHAMENTO -->
+    <div class="parent-shared">
+        <img src="{{ url_for('static', filename='profile_pics/' + (post.parent_shared.author.profile_pic or 'default.png')) }}"
+             class="author-pic" width="40" height="40">
 
-        <p>{{ post.post.author.username }}</p>
+        <p><strong>{{ post.parent_shared.author.username }}</strong> compartilhou anteriormente o post de <strong>{{ post.post.author.username }}</strong></p>
+        <p>{{ post.parent_shared.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
+
+        {% if post.parent_shared.body %}
+            <p>{{ post.parent_shared.body }}</p>
+        {% endif %}
+    </div>
+
+    {% else %}
+    <!-- SE NÃO TEM PARENT_SHARED → É O PRIMEIRO COMPARTILHAMENTO → MOSTRA O POST ORIGINAL -->
+    <div class="original-post">
+        <img src="{{ url_for('static', filename='profile_pics/' + (post.post.author.profile_pic or 'default.png')) }}"
+             class="author-pic" width="40" height="40">
+
+        <p><strong>{{ post.post.author.username }}</strong></p>
         <p>{{ post.post.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
 
         <h3>{{ post.post.title }}</h3>
         <p>{{ post.post.body }}</p>
 
         {% if post.post.post_pic %}
-        <img src = "{{ url_for('static', filename = 'post_pics/' + post.post.post_pic) }}"
-             class = "post-pic">
+            <img src="{{ url_for('static', filename='post_pics/' + post.post.post_pic) }}"
+                 class="post-pic">
         {% endif %}
     </div>
+    {% endif %}
 
-    <!-- INTERACTIONS -->
-    <div class = "interactions">
+    <!-- INTERAÇÕES -->
+    <div class="interactions">
 
-        <!-- TODO -->
-        <form action="{{ url_for('user.like_shared_post', shared_id = post.id) }}" method="POST">
-            <button type = "submit" class = "btn btn-primary">Like</button>
+        <form action="{{ url_for('user.like_shared_post', shared_id=post.id) }}" method="POST">
+            <button type="submit" class="btn btn-primary">Like</button>
         </form>
-        <p>{{ post.likes | length }}</p>
 
-        <!-- Comments -->
-        <div class = "comments">
+        <p>{{ post.likes|length }}</p>
+
+        <form action="{{ url_for('user.share_shared_post', shared_post_id=post.id) }}" method="POST">
+            <button type="submit" class="btn btn-primary">Share</button>
+        </form>
+
+        <!-- COMMENTS -->
+        <div class="comments">
             <h3>Comments</h3>
-            <form action="{{ url_for('user.see_shared_post', shared_post_id = post.id) }}" method="POST">
+            <form action="{{ url_for('user.see_shared_post', shared_post_id=post.id) }}" method="POST">
                 {{ form.hidden_tag() }}
                 {{ form.body(rows=3, class_="form-control") }}
                 {{ form.submit(class_="btn btn-primary") }}
             </form>
 
             {% for comment in comments %}
-            <div class = "single-comment">
-                <img src = "{{ url_for('static', filename = 'profile_pics/' + (comment.author.profile_pic or 'default.png')) }}"
-                     class = "author-pic" width = "40" height = "40">
+                <div class="single-comment">
+                    <img src="{{ url_for('static', filename='profile_pics/' + (comment.author.profile_pic or 'default.png')) }}"
+                         class="author-pic" width="40" height="40">
 
-                <p>{{ comment.author.username }}</p>
-                <p>{{ comment.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
-                <p>{{ comment.body|safe }}</p>
+                    <p>{{ comment.author.username }}</p>
+                    <p>{{ comment.date.astimezone().strftime("%d/%m/%Y %H:%M") }}</p>
+                    <p>{{ comment.body|safe }}</p>
 
-                <form action = "{{ url_for('user.like_comment', comment_id = comment.id) }}" method = "POST">
-                    <button type = "submit" class = "btn btn-primary">Like</button>
-                </form>
+                    <form action="{{ url_for('user.like_comment', comment_id=comment.id) }}" method="POST">
+                        <button type="submit" class="btn btn-primary">Like</button>
+                    </form>
 
-                <p>{{ comment.likes | length }}</p>
-            </div>
+                    <p>{{ comment.likes|length }}</p>
+                </div>
             {% endfor %}
         </div>
 
