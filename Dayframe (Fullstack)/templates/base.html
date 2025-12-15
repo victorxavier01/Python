@@ -12,7 +12,7 @@
 
         <a href="{{ url_for('home.home') }}" class="home">Dayframe</a>
 
-        <nav>
+        <nav class="navbar">
             
             {% if current_user.is_authenticated %}
             <img src="{{ url_for('static', filename='profile_pics/' + (current_user.profile_pic or 'default.jpg')) }}" alt="User Icon" width="30" height="30" class="profile-pic">

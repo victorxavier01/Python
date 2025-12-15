@@ -1,14 +1,48 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dayframe | A fullstack project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
+</head>
+<body>
 
-{% block title %}Home{% endblock %}
+    <video class="bg-video" autoplay muted loop playsinline>
+        <source src="{{ url_for('static', filename='video/video.mp4') }}" type="video/mp4">
+    </video>
 
-{% block content %}
+    <div class="video-overlay"></div>
 
-<h1 class="home">Dayframe</h1>
-<p class="slogan">Each day, each frame</p>
+    <header class="header">
+        <a href="{{ url_for('home.home') }}" class="home">Dayframe</a>
+                
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('user.see_all_posts') }}" class="nav-item">Timeline</a>
+        <a href="{{ url_for('user.my_profile') }}" class="nav-item">My Profile</a>
+        <a href="{{ url_for('user.logout') }}" class="nav-item">Logout</a>
+        <img src="{{ url_for('static', filename='profile_pics/' + (current_user.profile_pic or 'default.jpg')) }}" alt="User Icon" width="30" height="30" class="profile-pic">
+        {% endif %}
 
-{% if current_user.is_authenticated %}
-    <p>Welcome, {{ current_user.username }}</p>
-{% endif %}
+        {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('user.login') }}" class="nav-item">Login</a>
+        <a href="{{ url_for('user.register') }}" class="nav-item">Register</a>
+        {% endif %}
 
-{% endblock %}
+    </header>
+
+    {% if current_user.is_authenticated %}
+    <div class="hero">
+        <h1 class="heading-primary">Welcome, {{ current_user.username }}</h1>
+        <p class="subheading">Each day, each frame</p>
+    </div>
+
+    {% else %}
+    <div class="hero">
+        <h1 class="heading-primary">Dayframe</h1>
+        <p class="subheading">Each day, each frame</p>
+    </div>
+    {% endif %}
+
+{% include "footer.html" %}
