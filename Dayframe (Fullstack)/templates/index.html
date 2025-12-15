@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<h1 class="home">Dayframe</h1>
+<p class="slogan">Each day, each frame</p>
+
+{% if current_user.is_authenticated %}
+    <p>Welcome, {{ current_user.username }}</p>
+{% endif %}
+
+{% endblock %}
