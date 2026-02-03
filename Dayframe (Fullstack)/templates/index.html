@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dayframe | A fullstack project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/queries.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon.png') }}">
 </head>
 <body>
 
@@ -15,34 +17,81 @@
 
     <div class="video-overlay"></div>
 
-    <header class="header">
-        <a href="{{ url_for('home.home') }}" class="home">Dayframe</a>
-                
+    <section class="header-section">  
+        <header class="header">
+            <a href="{{ url_for('home.home') }}" class="home">Dayframe</a>
+            
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('user.see_all_posts') }}" class="nav-item">Timeline</a>
+            <a href="{{ url_for('user.my_profile') }}" class="nav-item">My Profile</a>
+            <a href="{{ url_for('user.logout') }}" class="nav-item">Logout</a>
+            <img src="{{ url_for('static', filename='profile_pics/' + (current_user.profile_pic or 'default.jpg')) }}" alt="User Icon" width="30" height="30" class="profile-pic">
+            {% endif %}
+            
+            {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('user.login') }}" class="nav-item">Login</a>
+            <a href="{{ url_for('user.register') }}" class="nav-item">Register</a>
+            {% endif %}
+        </header>
+    </section>
+
+    <section class="hero-section">
         {% if current_user.is_authenticated %}
-        <a href="{{ url_for('user.see_all_posts') }}" class="nav-item">Timeline</a>
-        <a href="{{ url_for('user.my_profile') }}" class="nav-item">My Profile</a>
-        <a href="{{ url_for('user.logout') }}" class="nav-item">Logout</a>
-        <img src="{{ url_for('static', filename='profile_pics/' + (current_user.profile_pic or 'default.jpg')) }}" alt="User Icon" width="30" height="30" class="profile-pic">
+        <div class="hero">
+            <div class="logo">
+                <div class="inner-logo">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="dayframe logo" class="logo-img">
+                    <p class="subheading">Each day, each frame</p>
+                </div>
+            </div>
+            <div class="hero-options">
+                <h1 class="heading-primary">Welcome, {{ current_user.username }}!</h1>
+                <span class="author-span">A fullstack project by <a href="https://linkedin.com/in/victor-xavier-89a339378/" class="author" target="_blank" rel="noopener noreferrer">Victor Xavier</a></span>
+                <a href="{{ url_for('user.see_all_posts') }}" class="hero-btn all-post-btn">What's going on?</a>
+                <a href="{{ url_for('user.create_post') }}" class="hero-btn create-post-btn">What's on your mind?</a>
+            </div>
+        </div>
+    
+        {% else %}
+        <div class="hero">
+            <div class="logo">
+                <div class="inner-logo">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="dayframe logo" class="logo-img">
+                    <p class="subheading">Each day, each frame</p>
+                </div>
+            </div>
+            <div class="hero-options">
+                <h1 class="heading-primary">Welcome to Dayframe!</h1>
+                <span class="author-span">A fullstack project by<a href="https://linkedin.com/in/victor-xavier-89a339378/" class="author" target="_blank" rel="noopener noreferrer">Victor Xavier</a></span>
+                <a href="{{ url_for('user.register') }}" class="hero-btn all-post-btn">Sing up</a>
+                <a href="{{ url_for('user.login') }}" class="hero-btn create-post-btn">Login</a>
+            </div>
+        </div>
         {% endif %}
+    </section>
 
-        {% if not current_user.is_authenticated %}
-        <a href="{{ url_for('user.login') }}" class="nav-item">Login</a>
-        <a href="{{ url_for('user.register') }}" class="nav-item">Register</a>
-        {% endif %}
+    <section class="section about-section">
+        <div class="grid--2-cols base-container">
+            <h2 class="h2-heading">About Dayframe</h2>
+            <img src="{{ url_for('static', filename='images/author.png') }}" alt="author-image" class="img section-img">
+            <p class="paragraph">
+                Dayframe is a fullstack web apllication build with flask, SQLAlchemy, HTML, CSS and Python.
+                This project was entirely developed by me, <a href="https://linkedin.com/in/victor-xavier-89a339378/" class="author" target="_blank" rel="noopener noreferrer">Victor Xavier</a>, as a way to improve my skill as a developer.
+            </p>   
+        </div>
+    </section>
 
-    </header>
+    <section class="section features-section">
+        <div class="grid--2-cols base-container">
+            <h2 class="h2-heading">Features</h2>
+        </div>
+    </section>
 
-    {% if current_user.is_authenticated %}
-    <div class="hero">
-        <h1 class="heading-primary">Welcome, {{ current_user.username }}</h1>
-        <p class="subheading">Each day, each frame</p>
-    </div>
+    <section class="section cta-section">
+        <div class="base-container">
+            <h2 class="h2-heading">Let's get in touch!</h2>
 
-    {% else %}
-    <div class="hero">
-        <h1 class="heading-primary">Dayframe</h1>
-        <p class="subheading">Each day, each frame</p>
-    </div>
-    {% endif %}
-
+        </div>
+    </section>
+    
 {% include "footer.html" %}

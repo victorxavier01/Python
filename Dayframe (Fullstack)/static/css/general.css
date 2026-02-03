@@ -18,7 +18,7 @@ Paragraph default: 1.6
 Large: 1.8
 
 - Letter spacing
--0.5px
+0.5px
 0.75px
 
 --- 02 COLORS
@@ -35,6 +35,7 @@ Large: 1.8
 
 - Accents: 
 #FF8811
+#d37211
 - Greys
 #888
 #767676 (lightest grey allowed on #fff)
@@ -77,23 +78,20 @@ a {
     text-decoration: none;
     color: #fff;
     letter-spacing: -0.5px;
-    transition: color 0.2s ease, text-decoration-color 0.2s ease;
+    transition: color 0.2s ease;
     padding: 0.3rem;
     font-style: bold;
     font-weight: 600;
 }
 
-a:hover {
+a:hover,
+a:active {
     color: #FF8811;
     font-weight: 600;
     font-style: bold;
 }
 
 h1 {
-    color: #fff;
-}
-
-h2 {
     color: #fff;
 }
 
@@ -137,7 +135,6 @@ h2 {
 
 .hero h1 {
   color: #fff;
-  letter-spacing: -0.5px;
 }
 
 .hero p {
@@ -148,7 +145,8 @@ h2 {
   color: #b0acbd;
 }
 
-.nav-item:hover {
+.nav-item:hover,
+.nav-item:active {
   color: #FF8811;
 }
 
@@ -156,4 +154,109 @@ h2 {
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.section {
+  margin: auto 0;
+  align-items: center;
+  justify-content: center;;
+}
+
+.hero-section {
+  margin: auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5% 0 9.6rem 0;
+}
+
+.hero {
+  text-align: center;
+  display: flex;
+  gap: 2.4rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.subheading {
+  font-size: 2.4rem;
+}
+
+.logo-img {
+  height: 32rem;
+  width: 48rem;
+  margin-right: -1.2rem;
+}
+
+.hero-options {
+  margin-left: 2rem;
+}
+
+.heading-primary {
+  font-size: 5rem;
+}
+
+.hero-btn {
+  font-size: 1.6rem;
+  padding: 1.2rem 1.4rem;
+  display: inline-block;
+  margin-top: 2.4rem;
+  background-color: #392F5A;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.hero-btn:hover,
+.hero-btn:active {
+  background-color: #2e2648;
+  color: #fff;
+}
+
+.author {
+  color: #b0acbd;
+  font-size: 1.4rem;
+}
+.author-span {
+  display: block;
+  color: #b0acbd;
+  margin-top: 0.8rem;
+}
+
+.all-post-btn {
+  margin-right: 2.4rem;
+  background-color: #FF8811;
+}
+
+.all-post-btn:hover,
+.all-post-btn:active {
+  background-color: #d37211;
+}
+
+.base-container {
+  padding: 4.8rem 0;
+  justify-items: center;
+  text-align: center;
+  background-color: #171324;
+}
+
+.h2-heading {
+  display: inline-block;
+  font-size: 4.8rem;
+  background: linear-gradient(20deg, #88829c, #FF8811);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  grid-column: span 2;
+}
+
+.grid--2-cols {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 4.8rem;
+  row-gap: 6.4rem;
+}
+
+.footer-section {
+  height: 30vh;
+  background-color: #171324;
 }
